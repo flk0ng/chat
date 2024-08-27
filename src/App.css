@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-color: #282c34;
+  background-color: #58595a;
 }
 
 .App-logo {
@@ -36,6 +36,10 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.ChatBox{
+  background-color: aqua;
 }
 
 

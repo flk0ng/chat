@@ -1,29 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useRef} from "react";
 import Mensaje from "./Mensaje";
 
 function ChatBox(){
 const [mensaje, setMensaje]= useState([]);
 const [input, setInput]= useState('');
 const[isUserTurn, setIsUserTurn]=useState(true);
+const ws =useRef(null)
 
-//Carga mensajes desde el localStorage
 useEffect(()=>{
-    const savedMessages = JSON.parse(localStorage.getItem('messages')) || [];
-}, []);
+    ws.current = new WebSocket('ws.//localhost:8080')
 
-//Guarda mensajes en el localStorage
-useEffect(()=>{
-    localStorage.setItem('mensaje', JSON.stringify(mensaje));
-},[mensaje]);
+    ws.current.onmessage = (event) =>{
+        const newMessage = JSON.parse(event.data)
+        setMensaje(prevMessages =>[...prevMessages, newMessage])
+    }
+    return()=> ws.current.close();
+}, [])
+
+
 
 const handleSend= ()=>{
+    if (ws.current && ws.current.readState  === WebSocket.OPEN){
     if (input.trim()){
-        const sender=isUserTurn ? 'user' : 'other';
-        const newMessage ={sender, text:input}
-        setMensaje([...mensaje, newMessage]);
+        const newMessage ={
+            sender: isUserTurn ? 'user' :'other',
+            text: input          
+        }
+
+        ws.current.send(JSON.stringify(newMessage))
         setInput('')
         setIsUserTurn(!isUserTurn);
     }
+}else{
+console.error('El WebSocket no esta abierto' + ws.current.readState)
+
 }
  
 return(
@@ -48,5 +58,5 @@ return(
 </div>
 );
 }
-
+}
 export default ChatBox;
